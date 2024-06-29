@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Looper</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Live Looper</h1>
+        <div class="controls">
+            <button id="record">Record</button>
+            <button id="play">Play</button>
+            <button id="stop">Stop</button>
+        </div>
+        <div id="countdown-container">
+            <div id="countdown">4</div>
+        </div>
+        <div id="recording-indicator">Recording...</div>
+        <div id="beat-indicators">
+            <div class="beat-indicator"></div>
+            <div class="beat-indicator"></div>
+            <div class="beat-indicator"></div>
+            <div class="beat-indicator"></div>
+        </div>
+        <hr class="divider">
+        <div id="loops"></div>
+    </div>
+    <audio id="metronome-sound" src="metronome.mp3" preload="auto"></audio>
+    <audio id="start-sound" src="start.mp3" preload="auto"></audio>
+    <audio id="stop-sound" src="stop.mp3" preload="auto"></audio>
+    <script src="https://cdn.socket.io/4.1.3/socket.io.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
