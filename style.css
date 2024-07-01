@@ -23,7 +23,7 @@ body {
 h1 {
     font-size: 2.5em;
     color: #4caf50;
-    margin-bottom: 40px; /* Increased space below the heading */
+    margin-bottom: 20px;
 }
 
 .controls {
@@ -60,7 +60,6 @@ button:hover {
 
 .beat-indicator.active {
     background-color: #4caf50;
-    border: 3px solid #4caf50; /* Added border for active beat */
 }
 
 #countdown-container {
