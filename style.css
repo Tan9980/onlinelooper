@@ -23,23 +23,26 @@ body {
 h1 {
     font-size: 2.5em;
     color: #4caf50;
-    margin-bottom: 20px;
+    margin-bottom: 40px; /* Increased space below the heading */
 }
 
 .controls {
     margin-bottom: 20px;
+    display: flex;
+    justify-content: space-around;
 }
 
 button {
     background-color: #333;
     color: #E0E0E0;
     border: none;
-    padding: 10px 30px;
-    margin: 10px;
+    padding: 10px 0;
     font-size: 1em;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    width: 40%; /* Adjusted to ensure buttons fit well in the container */
+    margin: 0 5%; /* Added margin for spacing between buttons */
 }
 
 button:hover {
@@ -48,16 +51,16 @@ button:hover {
 
 .beat-indicator {
     display: inline-block;
-    width: 20px;
-    height: 20px;
+    width: 100px;
+    height: 100px;
     margin: 5px;
     background-color: #3A3A3A;
-    border-radius: 50%;
-    transition: background-color 0.2s ease;
+    border-radius: 10px;
 }
 
 .beat-indicator.active {
     background-color: #4caf50;
+    border: 3px solid #4caf50; /* Added border for active beat */
 }
 
 #countdown-container {
@@ -67,12 +70,6 @@ button:hover {
 #countdown {
     font-size: 2em;
     margin-top: 10px;
-    visibility: hidden;
-}
-
-#recording-indicator {
-    color: #FF5252;
-    font-weight: bold;
     visibility: hidden;
 }
 

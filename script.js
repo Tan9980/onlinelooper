@@ -9,7 +9,6 @@ const TOTAL_DURATION = 4 * BEAT_DURATION * 1000; // 4 beats in milliseconds
 
 const beatIndicators = document.querySelectorAll('.beat-indicator');
 const countdownDisplay = document.getElementById('countdown');
-const recordingIndicator = document.getElementById('recording-indicator');
 
 const metronomeSound = document.getElementById('metronome-sound');
 const startSound = document.getElementById('start-sound');
@@ -19,6 +18,17 @@ let beatVisualizationInterval;
 let playbackInterval;
 let isPlaying = false;
 let currentBeat = 0;
+
+// Request microphone access on page load
+window.addEventListener('load', () => {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            // Do nothing with the stream, just request access
+        })
+        .catch(error => {
+            console.error('Error accessing microphone on page load:', error);
+        });
+});
 
 document.getElementById('record').onclick = () => {
     if (!mediaRecorder || mediaRecorder.state === 'inactive') {
@@ -32,12 +42,10 @@ document.getElementById('play').onclick = () => {
     if (!isPlaying) {
         startPlayback();
         startBeatVisualization();
+    } else {
+        stopPlayback();
+        stopBeatVisualization();
     }
-};
-
-document.getElementById('stop').onclick = () => {
-    stopPlayback();
-    stopBeatVisualization();
 };
 
 function startBuffer() {
@@ -52,7 +60,7 @@ function startBuffer() {
         metronomeSound.play();
         if (countdown <= 0) {
             clearInterval(countdownInterval);
-            countdownDisplay.style.visibility = 'hidden';
+            countdownDisplay.innerText = 'Recording...';
             startRecording();
         }
     }, BEAT_DURATION * 1000);
@@ -74,7 +82,6 @@ function startRecording() {
         };
         mediaRecorder.start();
         recordingStartTime = audioContext.currentTime;
-        recordingIndicator.style.visibility = 'visible';
         document.getElementById('record').innerText = 'Stop Recording';
         setTimeout(stopRecording, TOTAL_DURATION); // Stop after total duration
         startBeatVisualization(); // Start visualizing beats during recording
@@ -87,7 +94,7 @@ function stopRecording() {
     stopSound.play();
     if (mediaRecorder) {
         mediaRecorder.stop();
-        recordingIndicator.style.visibility = 'hidden';
+        countdownDisplay.style.visibility = 'hidden';
         document.getElementById('record').innerText = 'Record';
         stopBeatVisualization(); // Stop visualizing beats
     }
@@ -138,6 +145,13 @@ function createLoop(blob) {
 
 function startPlayback() {
     isPlaying = true;
+    document.getElementById('play').innerText = 'Pause';
+    loops.forEach(loop => {
+        if (loop.enabled) {
+            loop.audio.currentTime = 0;
+            loop.audio.play();
+        }
+    });
     playbackInterval = setInterval(() => {
         loops.forEach(loop => {
             if (loop.enabled) {
@@ -155,6 +169,7 @@ function stopPlayback() {
     playbackInterval = null;
     isPlaying = false;
     loops.forEach(loop => loop.audio.pause());
+    document.getElementById('play').innerText = 'Play';
 }
 
 function startBeatVisualization() {
