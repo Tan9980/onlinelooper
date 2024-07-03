@@ -18,12 +18,45 @@ body {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     background-color: #1F1F1F;
     border-radius: 10px;
+    margin: 20px; /* Added margin to the container */
 }
 
 h1 {
     font-size: 2.5em;
     color: #4caf50;
+    margin-top: 0px;
     margin-bottom: 20px;
+}
+
+.bpm-control {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.bpm-control label {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+#bpm {
+    width: 80px;
+    font-size: 1.2em;
+    text-align: center;
+    background-color: #2E2E2E;
+    color: #E0E0E0;
+    border: 1px solid #4caf50;
+    border-radius: 5px;
+    padding: 5px;
+    outline: none;
+    -moz-appearance: textfield; /* Hide the arrows for Firefox */
+}
+
+#bpm::-webkit-outer-spin-button,
+#bpm::-webkit-inner-spin-button {
+    -webkit-appearance: none; /* Hide the arrows for Chrome, Safari, Edge, and Opera */
+    margin: 0;
 }
 
 .controls {
@@ -40,9 +73,8 @@ button {
     font-size: 1em;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    width: 40%; /* Adjusted to ensure buttons fit well in the container */
-    margin: 0 5%; /* Added margin for spacing between buttons */
+    min-width: 35%; /* Set min-width of buttons in control div to 35% */
+    max-width: fit-content;
 }
 
 button:hover {
@@ -55,11 +87,20 @@ button:hover {
     height: 100px;
     margin: 5px;
     background-color: #3A3A3A;
+    border: 2px solid #3A3A3A; /* Default border color */
     border-radius: 10px;
 }
 
 .beat-indicator.active {
     background-color: #4caf50;
+}
+
+.beat-indicator.filled {
+    background-color: #4caf50;
+}
+
+.beat-indicator.countdown {
+    border-color: #4caf50;
 }
 
 #countdown-container {
@@ -91,7 +132,12 @@ button:hover {
     display: flex;
     align-items: center;
 }
+img{
+    width: 150px;
+    margin: 20px;
+    margin-bottom: 0px;
 
+}
 .loop-container .audio-controls button {
     background-color: #444;
     border: none;
@@ -100,7 +146,7 @@ button:hover {
     padding: 10px 20px;
     cursor: pointer;
     border-radius: 5px;
-    transition: background-color 0.3s ease;
+    min-width: 100px; /* Set min-width of buttons in audio controls to 100px */
 }
 
 .loop-container .audio-controls button:hover {
