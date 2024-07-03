@@ -4,7 +4,7 @@ let mediaRecorder;
 let chunks = [];
 let loops = [];
 let recordingStartTime;
-let bpm = 100; // Default BPM
+let bpm = 80; // Default BPM
 let BEAT_DURATION = 60 / bpm;
 let TOTAL_DURATION = 4 * BEAT_DURATION * 1000;
 
@@ -20,6 +20,7 @@ let beatVisualizationInterval;
 let playbackInterval;
 let isPlaying = false;
 let currentBeat = 0;
+let isMicrophoneAccessible = false; // Flag to check microphone access
 
 // Request microphone access on page load
 window.addEventListener('load', () => {
@@ -30,6 +31,7 @@ window.addEventListener('load', () => {
 function checkMicrophonePermission() {
     navigator.mediaDevices.getUserMedia({ audio: true })
         .then(stream => {
+            isMicrophoneAccessible = true;
             // Create a silent dummy recording to initialize mediaRecorder
             mediaRecorder = new MediaRecorder(stream);
             mediaRecorder.ondataavailable = e => chunks.push(e.data);
@@ -41,6 +43,7 @@ function checkMicrophonePermission() {
         })
         .catch(error => {
             console.error('Error accessing microphone:', error);
+            alert('Microphone access is required to use the recording feature.');
         });
 }
 
@@ -52,6 +55,10 @@ bpmInput.addEventListener('change', (event) => {
 });
 
 document.getElementById('record').onclick = () => {
+    if (!isMicrophoneAccessible) {
+        alert('Microphone access is required to use the recording feature.');
+        return;
+    }
     if (!mediaRecorder || mediaRecorder.state === 'inactive') {
         startBuffer();
     } else if (mediaRecorder.state === 'recording') {
@@ -217,6 +224,7 @@ function startBeatVisualization() {
             stopBeatVisualization();
         }
     }
+
     visualizeBeat();
 }
 
@@ -227,9 +235,7 @@ function stopBeatVisualization() {
 }
 
 function resetBeatIndicators() {
-    beatIndicators.forEach(indicator => indicator.classList.remove('active', 'countdown', 'filled'));
+    beatIndicators.forEach(indicator => {
+        indicator.classList.remove('active', 'filled', 'countdown');
+    });
 }
-
-socket.on('audio', (blob) => {
-    createLoop(blob);
-});
