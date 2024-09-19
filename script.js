@@ -3,6 +3,8 @@ let audioContext = new (window.AudioContext || window.webkitAudioContext)();
 let mediaRecorder;
 let chunks = [];
 let loops = [];
+let currentLoopSet = 0;
+let loopSets = [[]]; // Array of loop sets, each being an array of loops
 let recordingStartTime;
 let bpm = 80; // Default BPM
 let BEAT_DURATION = 60 / bpm;
@@ -52,8 +54,13 @@ bpmInput.addEventListener('change', (event) => {
     bpm = parseInt(event.target.value, 10);
     BEAT_DURATION = 60 / bpm;
     TOTAL_DURATION = 4 * BEAT_DURATION * 1000;
+    if (isPlaying) {
+        stopPlayback();
+        startPlayback();
+    }
 });
 
+// Event listeners for buttons
 document.getElementById('record').onclick = () => {
     if (!isMicrophoneAccessible) {
         alert('Microphone access is required to use the recording feature.');
@@ -76,6 +83,48 @@ document.getElementById('play').onclick = () => {
     }
 };
 
+document.getElementById('new-set').onclick = () => {
+    loopSets.push([]);
+    currentLoopSet = loopSets.length - 1;
+    updateSetName();
+    renderLoopSet();
+};
+
+document.getElementById('previous-set').onclick = () => {
+    if (currentLoopSet > 0) {
+        currentLoopSet--;
+        updateSetName();
+        renderLoopSet();
+    }
+};
+
+document.getElementById('next-set').onclick = () => {
+    if (currentLoopSet < loopSets.length - 1) {
+        currentLoopSet++;
+        updateSetName();
+        renderLoopSet();
+    }
+};
+
+document.getElementById('move-set-up').onclick = () => {
+    if (currentLoopSet > 0) {
+        [loopSets[currentLoopSet], loopSets[currentLoopSet - 1]] = [loopSets[currentLoopSet - 1], loopSets[currentLoopSet]];
+        currentLoopSet--;
+        updateSetName();
+        renderLoopSet();
+    }
+};
+
+document.getElementById('move-set-down').onclick = () => {
+    if (currentLoopSet < loopSets.length - 1) {
+        [loopSets[currentLoopSet], loopSets[currentLoopSet + 1]] = [loopSets[currentLoopSet + 1], loopSets[currentLoopSet]];
+        currentLoopSet++;
+        updateSetName();
+        renderLoopSet();
+    }
+};
+
+// Start a buffer countdown before recording
 function startBuffer() {
     let countdown = 4;
     countdownDisplay.style.visibility = 'visible';
@@ -99,6 +148,7 @@ function startBuffer() {
     }, BEAT_DURATION * 1000);
 }
 
+// Start recording
 function startRecording() {
     startSound.play();
     navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
@@ -119,6 +169,7 @@ function startRecording() {
     });
 }
 
+// Stop recording
 function stopRecording() {
     stopSound.play();
     if (mediaRecorder) {
@@ -129,60 +180,64 @@ function stopRecording() {
     }
 }
 
+// Create a new loop from the recorded audio blob
 function createLoop(blob) {
     const url = URL.createObjectURL(blob);
     const audio = new Audio(url);
     const loop = { audio, enabled: true };
-    loops.push(loop);
-    const loopContainer = document.getElementById('loops');
-    const loopDiv = document.createElement('div');
-    loopDiv.classList.add('loop-container');
-
-    const audioName = document.createElement('div');
-    audioName.classList.add('audio-name');
-    audioName.innerText = `Track ${loops.length}`;
-
-    const audioControls = document.createElement('div');
-    audioControls.classList.add('audio-controls');
-
-    const playPauseButton = document.createElement('button');
-    playPauseButton.innerText = 'Play';
-    playPauseButton.onclick = () => {
-        if (audio.paused) {
-            audio.play();
-            playPauseButton.innerText = 'Pause';
-        } else {
-            audio.pause();
-            playPauseButton.innerText = 'Play';
-        }
-    };
-
-    const muteButton = document.createElement('button');
-    muteButton.innerText = 'Mute';
-    muteButton.onclick = () => {
-        audio.muted = !audio.muted;
-        muteButton.innerText = audio.muted ? 'Unmute' : 'Mute';
-    };
-
-    audioControls.appendChild(playPauseButton);
-    audioControls.appendChild(muteButton);
-
-    loopDiv.appendChild(audioName);
-    loopDiv.appendChild(audioControls);
-    loopContainer.appendChild(loopDiv);
+    loopSets[currentLoopSet].push(loop);
+    renderLoopSet();
 }
 
+// Render the current loop set
+function renderLoopSet() {
+    const loopContainer = document.getElementById('loops');
+    loopContainer.innerHTML = ''; // Clear existing loops
+    loopSets[currentLoopSet].forEach((loop, index) => {
+        const loopDiv = document.createElement('div');
+        loopDiv.classList.add('loop-container');
+        const audioName = document.createElement('div');
+        audioName.classList.add('audio-name');
+        audioName.innerText = `Track ${index + 1}`;
+        const audioControls = document.createElement('div');
+        audioControls.classList.add('audio-controls');
+        const playPauseButton = document.createElement('button');
+        playPauseButton.innerText = 'Play';
+        playPauseButton.onclick = () => {
+            if (loop.audio.paused) {
+                loop.audio.play();
+                playPauseButton.innerText = 'Pause';
+            } else {
+                loop.audio.pause();
+                playPauseButton.innerText = 'Play';
+            }
+        };
+        const muteButton = document.createElement('button');
+        muteButton.innerText = 'Mute';
+        muteButton.onclick = () => {
+            loop.audio.muted = !loop.audio.muted;
+            muteButton.innerText = loop.audio.muted ? 'Unmute' : 'Mute';
+        };
+        audioControls.appendChild(playPauseButton);
+        audioControls.appendChild(muteButton);
+        loopDiv.appendChild(audioName);
+        loopDiv.appendChild(audioControls);
+        loopContainer.appendChild(loopDiv);
+    });
+}
+
+// Start playback of the current loop set
 function startPlayback() {
     isPlaying = true;
     document.getElementById('play').innerText = 'Pause';
-    loops.forEach(loop => {
+    loopSets[currentLoopSet].forEach(loop => {
         if (loop.enabled) {
             loop.audio.currentTime = 0;
             loop.audio.play();
         }
     });
     playbackInterval = setInterval(() => {
-        loops.forEach(loop => {
+        loopSets[currentLoopSet].forEach(loop => {
             if (loop.enabled) {
                 loop.audio.currentTime = 0;
                 loop.audio.play();
@@ -193,18 +248,20 @@ function startPlayback() {
     }, TOTAL_DURATION);
 }
 
+// Stop playback
 function stopPlayback() {
     clearInterval(playbackInterval);
     playbackInterval = null;
     isPlaying = false;
-    loops.forEach(loop => loop.audio.pause());
+    loopSets[currentLoopSet].forEach(loop => loop.audio.pause());
     document.getElementById('play').innerText = 'Play';
 }
 
+// Start beat visualization
 function startBeatVisualization() {
     if (beatVisualizationInterval) return; // Avoid multiple intervals
-
     currentBeat = 0;
+    
     function visualizeBeat() {
         beatIndicators.forEach((indicator, index) => {
             if (isPlaying || mediaRecorder?.state === 'recording') {
@@ -217,25 +274,38 @@ function startBeatVisualization() {
                 indicator.classList.remove('active', 'filled', 'countdown');
             }
         });
-        currentBeat = (currentBeat + 1) % 4;
-        if (isPlaying || mediaRecorder?.state === 'recording') {
-            beatVisualizationInterval = setTimeout(visualizeBeat, BEAT_DURATION * 1000); // Update every beat
-        } else {
-            stopBeatVisualization();
-        }
+
+        currentBeat = (currentBeat + 1) % beatIndicators.length;
     }
 
-    visualizeBeat();
+    beatVisualizationInterval = setInterval(visualizeBeat, BEAT_DURATION * 1000);
 }
 
+// Stop beat visualization
 function stopBeatVisualization() {
-    clearTimeout(beatVisualizationInterval);
+    clearInterval(beatVisualizationInterval);
     beatVisualizationInterval = null;
-    resetBeatIndicators();
+    beatIndicators.forEach(indicator => {
+        indicator.classList.remove('active', 'filled', 'countdown');
+    });
 }
 
+// Update the set name display
+function updateSetName() {
+    document.getElementById('set-name').innerText = `Set ${currentLoopSet + 1}`;
+}
+
+// Reset beat indicators
 function resetBeatIndicators() {
     beatIndicators.forEach(indicator => {
         indicator.classList.remove('active', 'filled', 'countdown');
     });
 }
+
+// Call this function to initialize the page with the first loop set
+function init() {
+    updateSetName();
+    renderLoopSet();
+}
+
+init();

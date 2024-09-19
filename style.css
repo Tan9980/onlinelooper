@@ -158,3 +158,44 @@ img{
     text-align: left;
     margin-left: 10px;
 }
+#loop-sets {
+    margin-top: 20px;
+}
+
+#loop-sets-controls {
+    margin-bottom: 10px;
+}
+
+#loop-sets-controls button {
+    margin: 5px;
+}
+
+#loop-sets-list {
+    margin-top: 10px;
+}
+
+.loop-set-container {
+    background-color: #2E2E2E;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.loop-set-container .loop-set-name {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+.loop-set-container .loop-set-controls button {
+    background-color: #444;
+    border: none;
+    color: #E0E0E0;
+    margin: 0 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.loop-set-container .loop-set-controls button:hover {
+    background-color: #8433EB;
+}
